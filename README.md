@@ -1,3 +1,6 @@
+# Usage
+[Unityでディープラーニング学習用の教師データを大量に生成する方法](https://zenn.dev/karaage0703/articles/2d54b5c02dfe39)
+
 # DiceExperiment
 
 Here's the video tutorial for using the dice example with Unity Perception:
