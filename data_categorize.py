@@ -1,23 +1,18 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import argparse
 import json
 import os
 import shutil
+import subprocess
 
-parser = argparse.ArgumentParser(description='data_categorize')
-parser.add_argument('--datasets_dir', default='')
-parser.add_argument('--images_dir', default='')
-parser.add_argument('--images_numb', default='100')
+cmd_sp = 'ls | grep Dataset'
+datasets_dir = subprocess.check_output(cmd_sp, shell=True).decode('utf-8').rstrip("\n")
+cmd_sp = 'ls | grep RGB'
+images_dir = subprocess.check_output(cmd_sp, shell=True).decode('utf-8').rstrip("\n")
+cmd_sp = 'ls ' + datasets_dir + ' | grep capture'
+ls_filenames = subprocess.check_output(cmd_sp, shell=True).decode('utf-8').strip().split('\n')
 
-args = parser.parse_args()
-
-datasets_dir = args.datasets_dir
-images_dir = args.images_dir
-images_numb = int(args.images_numb)
-
-filename = datasets_dir + '/captures_000.json'
 target_dir = 'target'
 
 if os.path.exists(target_dir):
@@ -25,21 +20,22 @@ if os.path.exists(target_dir):
 
 os.makedirs(target_dir)
 
-with open(filename, mode='r', encoding='utf-8') as f:
-    data = json.load(f)
+file_numb = 0
 
-for i in range(0, images_numb):
-    image_filename = data['captures'][i]['filename']
-    label_name = data['captures'][i]['annotations'][0]['values'][0]['label_id']
+for filename in ls_filenames:
+    filename = datasets_dir + '/' + filename
+    with open(filename, mode='r', encoding='utf-8') as f:
+        data = json.load(f)
 
-    target_label_dir = target_dir + '/' + str(label_name)
-    if not os.path.exists(target_label_dir):
-        os.makedirs(target_label_dir)
+    for i in range(0, len(data['captures'])):
+        image_filename = data['captures'][i]['filename']
+        label_name = data['captures'][i]['annotations'][0]['values'][0]['label_id']
 
-    image_org_filename = image_filename
-    image_target_filename = target_label_dir + '/' + str(i) + '.png'
+        target_label_dir = target_dir + '/' + str(label_name)
+        if not os.path.exists(target_label_dir):
+            os.makedirs(target_label_dir)
 
-    shutil.copyfile(image_org_filename, image_target_filename)
-
-# Usage
-# python3 data_categorize.py --datasets_dir="Datasetac6d0869-b074-4323-87f6-c2881bcc0ca7" --images_dir="RGBd50ab295-b98b-4d48-a68b-c8bdaa6e554f" --images_numb=100
+        image_org_filename = image_filename
+        image_target_filename = target_label_dir + '/' + str(file_numb) + '.png'
+        shutil.copyfile(image_org_filename, image_target_filename)
+        file_numb += 1
